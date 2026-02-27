@@ -40,6 +40,24 @@ async def read_task(task_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Завдання не знайдено")
     return task
 
+
+@app.get("/tasks/{task_id}/history", response_model=List[schemas.TaskHistoryResponse])
+async def read_task_history(
+    task_id: int,
+    skip: int = Query(0, ge=0, description="Пропустити N записів історії"),
+    limit: int = Query(50, ge=1, le=200, description="Кількість записів історії"),
+    event_type: Optional[models.TaskEventType] = Query(None, description="Фільтр за типом події"),
+    db: AsyncSession = Depends(get_db),
+):
+    history = await crud.get_task_history(
+        db=db,
+        task_id=task_id,
+        skip=skip,
+        limit=limit,
+        event_type=event_type,
+    )
+    return history
+
 @app.patch("/tasks/{task_id}", response_model=schemas.TaskResponse)
 async def update_task(task_id: int, task: schemas.TaskUpdate, db: AsyncSession = Depends(get_db)):
     """Оновлення завдання."""

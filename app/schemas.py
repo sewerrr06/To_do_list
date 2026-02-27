@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
-from .models import TaskStatus
+from typing import Optional, Any, List
+from .models import TaskStatus, TaskEventType
 from pydantic import EmailStr
 
 class TaskBase(BaseModel):
@@ -24,6 +24,19 @@ class TaskResponse(TaskBase):
     id: int
     status: TaskStatus
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TaskHistoryResponse(BaseModel):
+    id: int
+    task_id: int
+    event_type: TaskEventType
+    changed_at: datetime
+    before_data: Optional[dict[str, Any]] = None
+    after_data: Optional[dict[str, Any]] = None
+    changed_fields: Optional[List[str]] = None
 
     class Config:
         from_attributes = True
